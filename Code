@@ -1,0 +1,478 @@
+--Astro Party
+
+function setup()
+    gamestate=0
+    ShipWidth=60
+    x=50
+    y=50
+    x2=WIDTH-50
+    y2=HEIGHT-50
+    xb=x
+    yb=y
+    xb2=x2
+    yb2=y2
+    xSpeed=0
+    ySpeed=0
+    x2Speed=xSpeed
+    y2Speed=ySpeed
+    angle1=0
+    angle2=180
+    aw=0
+    bullet={} --a table for the bullet info
+    bullet2={}
+    bulletspeed=15
+    bulletdelay=-3
+    bulletdelay2=-3
+    ngtimer=50
+    touches={} --a table for touches
+    spacedust={}
+    ships={}
+    blueship={}
+    redship={}
+    displayMode(FULLSCREEN)
+    supportedOrientations(LANDSCAPE_ANY)
+    
+end
+
+function touched(touch)
+    if touch.state == ENDED then
+        -- When any touch ends, remove it from
+        --  our table
+        touches[touch.id] = nil
+    else
+        -- If the touch is in any other state 
+        --  (such as BEGAN) we add it to our
+        --  table
+        touches[touch.id] = touch
+    end
+end
+
+function draw()
+    background(0, 0, 0, 255)
+    sprite("Dropbox:Star Background",WIDTH/2,HEIGHT/2,WIDTH,HEIGHT)
+    
+    x=x+xSpeed
+    y=y+ySpeed
+    
+    x2=x2+x2Speed
+    y2=y2+y2Speed
+    
+    bulletdelay=bulletdelay-.05
+    
+    bulletdelay2=bulletdelay2-.05
+    
+    if bulletdelay<=-9 then 
+        bulletdelay=-8.9
+    end
+    
+    if bulletdelay2<=-9 then 
+        bulletdelay2=-8.9
+    end
+    
+    ---
+    
+    
+    for a,b in pairs(blueship) do
+    
+            pushMatrix()
+               translate(x,y)
+               rotate(angle1)
+               sprite("Dropbox:BlueShip", 0, 0, ShipWidth)
+            popMatrix()
+        
+        if gamestate==3 or gamestate==4 then
+            for a,b in pairs(blueship) do
+              
+                 table.remove(blueship,a)
+                
+            end
+        end
+        
+    end
+    
+    
+        
+    for a,b in pairs(redship) do
+        
+            pushMatrix()
+                translate(x2,y2)
+                rotate(angle2)
+                sprite("Dropbox:RedShip", 0, 0, ShipWidth)
+            popMatrix()
+       
+        if gamestate==3 or gamestate==4 then
+            for a,b in pairs(redship) do
+              
+                table.remove(redship,a)
+                
+            end
+        end 
+    
+    end
+    ---
+    
+    
+    
+    --
+    
+    if x<=25 then
+            x=25
+        end
+
+        if y<=25 then
+            y=25
+        end
+    
+        if x>=WIDTH-25 then
+            x=WIDTH-25
+        end
+    
+        if y>=HEIGHT-25 then
+            y=HEIGHT-25
+        end
+    
+    --
+    
+    if x2<=25 then
+        x2=25
+    end
+
+    if y2<=25 then
+        y2=25
+    end
+    
+    if x2>=WIDTH-25 then
+        x2=WIDTH-25
+    end
+    
+    if y2>=HEIGHT-25 then
+        y2=HEIGHT-25
+    end
+    
+    -------------
+    
+    -------------
+        
+    for k,touch in pairs(touches) do
+        
+    if gamestate==0 and ngtimer<0 and touch.state==BEGAN then
+            gamestate=1
+            ngtimer=50
+        end
+        
+    if gamestate==1 and ngtimer<0 and touch.state==BEGAN and touch.x>WIDTH/2-200 and touch.x<WIDTH/2+200 and touch.y>HEIGHT/2-200 and touch.y<HEIGHT/2+200 then
+        gamestate=2
+            x=50
+            y=50
+            x2=WIDTH-50
+            y2=HEIGHT-50
+            angle1=0
+            angle2=180
+            ySpeed=6
+            y2Speed=-6
+            ngtimer=50
+            
+    end
+        
+    if gamestate==4 and ngtimer<0 and touch.state==BEGAN or gamestate==3 and ngtimer<0 and touch.state==BEGAN then
+            gamestate=0
+            ngtimer=50
+    end
+        
+    if gamestate==2 and touch.state==BEGAN and touch.x<=200 and touch.y<=200 or gamestate==2 and touch.state==MOVING and touch.x<=200 and touch.y<=200 then
+        
+        pushStyle()
+        fill(0, 26, 255, 104)
+        rect(0,0,200)
+        popStyle()
+        
+        angle1 = ( -5 + angle1)
+        
+        xSpeed = (math.cos(math.rad(angle1+90)))*(6)
+        ySpeed = (math.sin(math.rad(angle1+90)))*(6)
+        
+    end
+    
+    if gamestate==2 and touch.state==BEGAN and touch.x>=WIDTH-200 and touch.y<=200 or gamestate==2 and  touch.state==MOVING and touch.x>=WIDTH-200 and touch.y<=200 then
+        
+        pushStyle()
+        fill(0, 26, 255, 104)
+        rect(WIDTH-200,0,200)
+        popStyle()
+        
+        angle1b=angle1
+        
+        if bulletdelay<0 then
+            table.insert(bullet,{x=x,y=y,a=angle1b})--add a new bullet to the table    
+            bulletdelay=bulletdelay+3 --reset the bullet delay
+            sound(SOUND_SHOOT, 5782)
+        end
+        
+        end
+        
+        -----------
+        
+        if gamestate==2 and touch.state==BEGAN and touch.x>=WIDTH-200 and touch.y>=HEIGHT-200 or gamestate==2 and touch.state==MOVING and touch.x>=WIDTH-200 and touch.y>=HEIGHT-200 then
+        
+        pushStyle()
+        fill(255, 0, 0, 104)
+        rect(WIDTH-200,HEIGHT-200,200)
+        popStyle()
+        
+        angle2 = ( -5 + angle2)
+        
+        x2Speed = (math.cos(math.rad(angle2+90)))*(6)
+        y2Speed = (math.sin(math.rad(angle2+90)))*(6)  
+        
+    end
+    
+    if gamestate==2 and touch.state==BEGAN and touch.x<=200 and touch.y>=HEIGHT-200 or gamestate==2 and touch.state==MOVING and touch.x<=200 and touch.y>=HEIGHT-200 then
+        
+        pushStyle()
+        fill(255, 0, 0, 104)
+        rect(0,HEIGHT-200,200)
+        popStyle()
+        
+            
+        angle2b=angle2
+        
+        if bulletdelay2<0 then
+            table.insert(bullet2,{x=x2,y=y2,a=angle2b})--add a new bullet to the table    
+            bulletdelay2=3+bulletdelay2 --reset the bullet delay
+            sound(SOUND_SHOOT, 5782)
+        end
+        
+        end
+        
+        -----------
+        
+        end
+        
+     for i,b in pairs(bullet) do
+        
+            pushMatrix()
+                translate(b.x,b.y)
+                rotate(b.a) 
+                sprite("Space Art:Green Bullet",0,0,10) 
+            popMatrix()
+        
+            b.x = b.x + bulletspeed*math.sin(math.rad(-b.a))
+            b.y = b.y + bulletspeed*math.cos(math.rad(-b.a))
+    
+        
+            if b.x>WIDTH or b.x<0 or b.y>HEIGHT or b.y<0 then
+            table.remove(bullet,i)
+            end
+        
+            if math.abs(x2-b.x)<ShipWidth/2 and math.abs(y2-b.y)<ShipWidth/2 then
+                gamestate=4
+                table.remove(bullet,i)
+                sound(SOUND_EXPLODE, 46955)          
+                for s=0,360,12 do                            
+                table.insert(spacedust,{x=x2,y=y2,dir=s,fade=175+math.random(50)+3*ShipWidth,size=2*math.random(5),speed=5+math.random(5)})
+                end
+            end       
+    end
+    
+    for i,b2 in pairs(bullet2) do
+        
+        pushMatrix()
+            translate(b2.x,b2.y)
+            rotate(b2.a) 
+            sprite("Space Art:Green Bullet",0,0,10) 
+        popMatrix()
+        
+        b2.x = b2.x + bulletspeed*math.sin(math.rad(-b2.a))
+        b2.y = b2.y + bulletspeed*math.cos(math.rad(-b2.a))
+    
+        
+        if b2.x>WIDTH or b2.x<0 or b2.y>HEIGHT or b2.y<0 then
+            table.remove(bullet2,i)
+        end
+        
+        if math.abs((x)-b2.x)<ShipWidth/3 and math.abs((y)-b2.y)<ShipWidth/3 then
+                table.remove(bullet2,i)
+                gamestate=3
+                --play explosion sound
+                sound(SOUND_EXPLODE, 46955)
+                
+        
+                for s=0,360,12 do                            
+                table.insert(spacedust,{x=x,y=y,dir=s,fade=175+math.random(50)+3*ShipWidth,size=2*math.random(5),speed=5+math.random(5)})
+                end
+            
+            
+            
+            end
+        
+    end
+    
+    for s,d in pairs(spacedust) do
+            --add transparency to the space dust so it fades away
+            tint(d.fade)
+            pushMatrix()
+                translate(d.x,d.y)
+                sprite("Cargo Bot:Star Filled",0,0,d.size,d.size) 
+            popMatrix()
+                d.x = d.x + d.speed*math.sin(math.rad(-d.dir))
+                d.y = d.y + d.speed*math.cos(math.rad(-d.dir))
+                d.fade = d.fade -5
+                if d.fade<0 then
+                    table.remove(spacedust,s)
+                end
+        tint(255)
+        
+    end
+    
+    if gamestate==0 then
+        ngtimer=ngtimer-.5
+        font("Futura-CondensedExtraBold")
+        fontSize(100)
+        fill(255, 255, 255, 255)
+        text("ASTRO",WIDTH/2,HEIGHT/2+50)
+        text("DUEL",WIDTH/2,HEIGHT/2-50)
+        
+    end
+    
+    if gamestate==1 then
+        ngtimer=ngtimer-.5
+        fill(255, 255, 255, 255)
+        font("Futura-CondensedExtraBold")
+        fontSize(45)
+        text("TAP TO BEGIN",WIDTH/2,HEIGHT/2)
+        
+        fill(0, 26, 255, 55)
+    pushStyle()
+    rect(0,0,200)
+    popStyle()
+    
+    fill(0, 26, 255, 55)
+    pushStyle()
+    rect(WIDTH-200,0,200)
+    popStyle()
+    
+    --
+    
+    fill(255, 0, 0, 55)
+    pushStyle()
+    rect(0,HEIGHT-200,200)
+    popStyle()
+    
+    fill(255, 0, 0, 55)
+    pushStyle()
+    rect(WIDTH-200,HEIGHT-200,200)
+    popStyle()
+        
+    end
+        
+    if gamestate==2 or gamestate==4 then 
+        
+    table.insert(ships,blueship)
+        
+        table.insert(blueship,{x=x,y=y,a=angle1})
+        
+        fill(0, 26, 255, 55)
+    pushStyle()
+    rect(0,0,200)
+    popStyle()
+    
+    fill(0, 26, 255, 55)
+    pushStyle()
+    rect(WIDTH-200,0,200)
+    popStyle()
+    
+    --
+    
+    fill(255, 0, 0, 55)
+    pushStyle()
+    rect(0,HEIGHT-200,200)
+    popStyle()
+    
+    fill(255, 0, 0, 55)
+    pushStyle()
+    rect(WIDTH-200,HEIGHT-200,200)
+    popStyle()
+        
+    end
+        
+    if gamestate==2 or gamestate==3 then
+        
+    table.insert(ships,redship)
+    
+        table.insert(redship,{x=x2,y=y2,a=angle2})
+        
+        fill(0, 26, 255, 55)
+    pushStyle()
+    rect(0,0,200)
+    popStyle()
+    
+    fill(0, 26, 255, 55)
+    pushStyle()
+    rect(WIDTH-200,0,200)
+    popStyle()
+    
+    --
+    
+    fill(255, 0, 0, 55)
+    pushStyle()
+    rect(0,HEIGHT-200,200)
+    popStyle()
+    
+    fill(255, 0, 0, 55)
+    pushStyle()
+    rect(WIDTH-200,HEIGHT-200,200)
+    popStyle()
+        
+    end
+    
+    aw=aw+5
+    
+    if gamestate==3 then 
+        pushMatrix()
+        translate(WIDTH/2,HEIGHT/2)
+        rotate(aw)
+        sprite("Dropbox:RedShip",0,0,75)
+        popMatrix()
+        fill(255, 255, 255, 255)
+        text('GAME OVER',WIDTH/2,HEIGHT/2+80)
+        text('RED WINS',WIDTH/2,HEIGHT/2-80)
+        font("Futura-CondensedExtraBold")
+        fontSize(50)
+        
+        xSpeed=0
+        x2Speed=0
+        ySpeed=0
+        y2Speed=0
+        
+        ngtimer=ngtimer-.5
+        
+    end
+    
+    if gamestate==4 then 
+        pushMatrix()
+        translate(WIDTH/2,HEIGHT/2)
+        rotate(aw)
+        sprite("Dropbox:BlueShip",0,0,75)
+        popMatrix()
+        fill(255, 255, 255, 255)
+        text('GAME OVER',WIDTH/2,HEIGHT/2+80)
+        text('BLUE WINS',WIDTH/2,HEIGHT/2-80)
+        font("Futura-CondensedExtraBold")
+        fontSize(50)
+        
+        xSpeed=0
+        x2Speed=0
+        ySpeed=0
+        y2Speed=0
+        
+        ngtimer=ngtimer-.5
+        
+    end
+    
+    
+    
+end
+    
+
+
+
